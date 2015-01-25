@@ -12,6 +12,7 @@ setup(
     url='https://github.com/jessamynsmith/paragres',
     download_url='',
     description='Utility for synchronizing parallel PostgreSQL databases on Heroku and localhost',
+    keywords=['postgresql', 'postgres', 'psql', 'pgbackups', 'database', 'heroku'],
 
     classifiers=[
         "Development Status :: 3 - Alpha",
