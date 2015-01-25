@@ -57,7 +57,7 @@ Supported transfers:
 |  |  | Destination |  |
 | --- | --- | --- | --- |
 |  |  | local database | Heroku app |
-| Source | local file | X |  |
+| **Source** | local file | X |  |
 |  | local database | X | X |
 |  | url | X | X |
 |  | Heroku app | X | X |
