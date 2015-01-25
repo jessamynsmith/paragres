@@ -15,7 +15,7 @@ Easily copy databases between locations, e.g.:
 Installation
 ------------
 
-You can get django-nose from PyPI with:
+You can get paragres from PyPI with:
 
     pip install paragres
 
