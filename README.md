@@ -35,9 +35,13 @@ Example 1, copying data between Heroku databases:
 
     paragres -s <source_heroku_app_name> -d <destination_heroku_app_name>
 
-Example 2, copying data from a Heroku database to localhost:
+Example 2, copying a new backup snapshot of data from a Heroku database to localhost:
 
-    paragres -s <heroku_app_name> -t path/to/db_settings.py
+    paragres -s <heroku_app_name> -c -t path/to/db_settings.py
+    
+Example 3, creating a backup snapshot of a Heroku database:
+
+    paragres -c -s <heroku_app_name>
     
 db_settings.py must contain at least the following (Django settings file format):
 

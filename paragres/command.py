@@ -175,6 +175,17 @@ class Command(object):
         ]
         subprocess.check_call(args)
 
+    def capture_heroku_database(self):
+        """ Capture Heroku database backup. """
+        self.print_message("Capturing database backup for app '%s'" % self.args.source_app)
+        args = [
+            "heroku",
+            "pgbackups:capture",
+            "--app=%s" % self.args.source_app,
+            # "--expire",
+        ]
+        subprocess.check_call(args)
+
     def replace_heroku_db(self):
         """ Replace Heroku database with database from specified source. """
         self.print_message("Replacing database for Heroku app '%s'" % self.args.destination_app)
@@ -251,9 +262,12 @@ class Command(object):
             self.initialize_db_settings()
             self.set_postgres_env_vars()
 
+        if self.args.capture:
+            self.capture_heroku_database()
+
         if self.args.destination_app:
             self.replace_heroku_db()
-        else:
+        elif self.args.dbname or self.args.settings:
             self.replace_local_db()
 
         self.print_message("\nDone.\n\nDon't forget to update the Django Site entry if necessary!")

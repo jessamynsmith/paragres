@@ -10,6 +10,8 @@ def create_parser():
                     'Specify a Heroku app destination with -d or omit to use localhost.\n'
                     'A single source is required, one of (-l, -u, -s) for a Heroku destination '
                     'or one of (-f, -l, -u, -s) for the localhost destination.\n'
+                    'You may specify that a new Heroku backup be captured (-c), otherwise the '
+                    'most recent backup will be used.\n'
                     'The localhost destination requires either a settings file (-t) or a database '
                     'name (-n). If authentication parameters are not supplied in a settings file, '
                     'standard PostgreSQL authentication will apply.')
@@ -18,6 +20,8 @@ def create_parser():
     parser.add_argument('-l', '--local-db', type=str, help='Local dbname to use as a data source')
     parser.add_argument('-u', '--url', type=str, help='Public URL from which to pull db file')
     parser.add_argument('-s', '--source-app', type=str, help='Heroku app from which to pull db')
+    parser.add_argument('-c', '--capture', default=False, action='store_true',
+                        help='Capture a new Heroku backup')
     parser.add_argument('-d', '--destination-app', type=str,
                         help='Heroku app for which to replace db')
     parser.add_argument('-n', '--dbname', type=str, help='Database name on localhost')
@@ -38,6 +42,9 @@ def main():
     parser = create_parser()
     args = parser.parse_args()
 
+    if args.capture and not args.source_app:
+        error(parser, 'Heroku backup capture requires a source Heroku app (-s)')
+
     if args.destination_app:
         has_one_data_source = (bool(args.local_db) ^ bool(args.url) ^ bool(args.source_app))
         if not has_one_data_source:
@@ -45,7 +52,7 @@ def main():
                           'local database (-l), url (-u) or Heroku app (-s)')
 
     if not args.destination_app:
-        if not args.settings and not args.dbname:
+        if not args.settings and not args.dbname and not args.capture:
             error(parser, 'The localhost destination requires either a database name (-n) '
                           'or a settings file containing one (-t)\n')
 
