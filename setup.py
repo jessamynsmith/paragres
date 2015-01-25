@@ -6,7 +6,7 @@ with open(p.join(p.dirname(__file__), 'requirements.txt'), 'r') as reqs:
 
 setup(
     name='paragres',
-    version='0.1',
+    version='0.2',
     author='Jessamyn Smith',
     author_email='jessamyn.smith@gmail.com',
     url='https://github.com/jessamynsmith/paragres',
