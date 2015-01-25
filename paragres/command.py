@@ -142,15 +142,12 @@ class Command(object):
     def drop_database(self):
         """ Drop local database. """
         self.print_message("Dropping database '%s'" % self.db_name)
-        try:
-            args = [
-                "dropdb",
-                self.db_name,
-            ]
-            subprocess.check_call(args)
-        except subprocess.CalledProcessError:
-            # Probably failed because the db did not exist to be dropped.
-            pass
+        args = [
+            "dropdb",
+            "--if-exists",
+            self.db_name,
+        ]
+        subprocess.check_call(args)
 
     def create_database(self):
         """ Create local database. """
