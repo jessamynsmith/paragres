@@ -10,7 +10,7 @@ setup(
     author='Jessamyn Smith',
     author_email='jessamyn.smith@gmail.com',
     url='https://github.com/jessamynsmith/paragres',
-    download_url='',
+    download_url='https://github.com/jessamynsmith/paragres/tarball/0.1',
     description='Utility for synchronizing parallel PostgreSQL databases on Heroku and localhost',
     keywords=['postgresql', 'postgres', 'psql', 'pgbackups', 'database', 'heroku'],
 
