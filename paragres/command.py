@@ -111,7 +111,7 @@ class Command(object):
             self.print_message("Decompressing %s" % source_file)
             subprocess.check_call(["gunzip", "--force", source_file])
             source_file = source_file[:-len(".gz")]
-            return source_file
+        return source_file
 
     def download_from_url(self, source_app, url):
         """ Download file from source app or url, and return local filename. """
