@@ -1,7 +1,7 @@
 paragres
 ========
 
-Utility for synchronizing parallel PostgreSQL databases on Heroku and localhost
+Utility for synchronizing parallel PostgreSQL databases on Heroku, local, and remote servers
 
 Features
 --------
@@ -60,8 +60,30 @@ Supported transfers:
 
 |  |  | Destination |  |
 | --- | --- | --- | --- |
-|  |  | local database | Heroku app |
+|  |  | postgres | Heroku app |
 | **Source** | local file | X |  |
-|  | local database | X | X |
+|  | postgres | X | X |
 |  | url | X | X |
 |  | Heroku app | X | X |
+
+
+Development
+-----------
+
+Fork the project on github and git clone your fork, e.g.:
+
+    git clone https://github.com/<username>/paragres.git
+
+Create a virtualenv and install dependencies:
+
+    mkvirtualenv paragres
+    pip install -r requirements.txt -r requirements_dev.txt
+
+Run tests and view coverage:
+
+    coverage run -m nose
+    coverage report
+
+Install your local copy:
+
+    python setup.py.install

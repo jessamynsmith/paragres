@@ -7,30 +7,67 @@ def create_parser():
     parser = argparse.ArgumentParser(
         description='Copy a PostgreSQL database from one location to another.\n'
                     'Any Heroku apps must have the Heroku Postgres and PG Backups add-ons.\n'
-                    'Specify a Heroku app destination with -d or omit to use localhost.\n'
-                    'A single source is required, one of (-l, -u, -s) for a Heroku destination '
-                    'or one of (-f, -l, -u, -s) for the localhost destination.\n'
+                    'Specify a Heroku app destination with -d or omit to use postgres directly.\n'
+                    'A single source is required, one of (-u, -s, -b, -o) for a Heroku destination '
+                    'or one of (-f, -u, -s, -b, -o) for a postgres destination.\n'
                     'You may specify that a new Heroku backup be captured (-c), otherwise the '
                     'most recent backup will be used.\n'
-                    'The localhost destination requires either a settings file (-t) or a database '
-                    'name (-n). If authentication parameters are not supplied in a settings file, '
-                    'standard PostgreSQL authentication will apply.')
+                    'A postgres source requires either a settings file (-o) or a database '
+                    'name (-b). A postgres destination also requires either a settings file (-t) '
+                    'or a database name (-n). If authentication parameters are not supplied in a '
+                    'settings file, standard PostgreSQL authentication will apply.')
     parser.add_argument('-f', '--file', type=str,
                         help='PostgreSQL dump file to use as a data source')
-    parser.add_argument('-l', '--local-db', type=str, help='Local dbname to use as a data source')
     parser.add_argument('-u', '--url', type=str, help='Public URL from which to pull db file')
     parser.add_argument('-s', '--source-app', type=str, help='Heroku app from which to pull db')
     parser.add_argument('-c', '--capture', default=False, action='store_true',
                         help='Capture a new Heroku backup')
+    parser.add_argument('-o', '--source-settings', type=str,
+                        help="Django-style settings file with database connection information for "
+                             "source database, or 'DJANGO_SETTINGS_MODULE' to use that environment "
+                             "variable's value")
+    parser.add_argument('-b', '--source-dbname', type=str,
+                        help='Source database name (overrides value in source settings if both are '
+                             'specified)')
     parser.add_argument('-d', '--destination-app', type=str,
                         help='Heroku app for which to replace db')
-    parser.add_argument('-n', '--dbname', type=str, help='Database name on localhost')
     parser.add_argument('-t', '--settings', type=str,
-                        help="Django-style settings file with database connection information, or "
-                             "'DJANGO_SETTINGS_MODULE' to use that environment variable's value")
+                        help="Django-style settings file with database connection information for "
+                             "destination database, or 'DJANGO_SETTINGS_MODULE' to use that "
+                             "environment variable's value")
+    parser.add_argument('-n', '--dbname', type=str,
+                        help='Destination database name (overrides value in settings if both are '
+                             'specified)')
     parser.add_argument('-v', '--verbosity', type=int, default=1,
                         help='Verbosity level: 0=minimal output, 1=normal output')
     return parser
+
+
+def verify_args(args):
+
+    if args.capture and not args.source_app:
+        return 'Heroku backup capture requires a source Heroku app (-s)'
+
+    if args.destination_app:
+        has_one_data_source = (bool(args.url) ^ bool(args.source_app)
+                               ^ bool(args.source_dbname) ^ bool(args.source_settings))
+        if not has_one_data_source:
+            return ('A Heroku app destination requires a single source, one of url (-u), '
+                    'Heroku app (-s), db name (-b) or db settings (-o)')
+    else:
+        if not args.dbname and not args.settings and not args.capture:
+            # Capturing a db does not require any destination information, so it is ok not to have
+            # any destination if capture is set
+            return ('A postgres destination requires either a database name (-n) or a '
+                    'settings file containing one (-t)')
+
+        has_one_data_source = (bool(args.file) ^ bool(args.url) ^ bool(args.source_app)
+                               ^ bool(args.source_dbname) ^ bool(args.source_settings))
+        if not has_one_data_source:
+            return ('A postgres destination requires a single source, one of file (-f), url (-u), '
+                    'Heroku app (-s), db name (-b) or db settings (-o)')
+
+    return None
 
 
 def error(parser, message):
@@ -40,27 +77,9 @@ def error(parser, message):
 
 def main():
     parser = create_parser()
-    args = parser.parse_args()
-
-    if args.capture and not args.source_app:
-        error(parser, 'Heroku backup capture requires a source Heroku app (-s)')
-
-    if args.destination_app:
-        has_one_data_source = (bool(args.local_db) ^ bool(args.url) ^ bool(args.source_app))
-        if not has_one_data_source:
-            error(parser, 'Heroku app destinations require a single source, one of '
-                          'local database (-l), url (-u) or Heroku app (-s)')
-
-    if not args.destination_app:
-        if not args.settings and not args.dbname and not args.capture:
-            error(parser, 'The localhost destination requires either a database name (-n) '
-                          'or a settings file containing one (-t)\n')
-
-        has_one_data_source = (bool(args.local_db) ^ bool(args.file) ^ bool(args.url)
-                               ^ bool(args.source_app))
-        if not has_one_data_source:
-            error(parser, 'The localhost destination requires a single source, one of '
-                          'file (-f), local database (-l), url (-u), or Heroku app (-s)')
-
-    command = Command(args)
+    parsed_args = parser.parse_args()
+    error_message = verify_args(parsed_args)
+    if error_message:
+        error(parser, error_message)
+    command = Command(parsed_args)
     command.run()

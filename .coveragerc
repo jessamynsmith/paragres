@@ -1,0 +1,4 @@
+[run]
+source = paragres
+branch = 1
+omit = */test/*

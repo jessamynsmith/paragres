@@ -3,6 +3,8 @@ import os.path as p
 
 with open(p.join(p.dirname(__file__), 'requirements.txt'), 'r') as reqs:
     install_requires = [line.strip() for line in reqs]
+with open(p.join(p.dirname(__file__), 'requirements_dev.txt'), 'r') as reqs:
+    tests_require = [line.strip() for line in reqs]
 
 setup(
     name='paragres',
@@ -11,7 +13,8 @@ setup(
     author_email='jessamyn.smith@gmail.com',
     url='https://github.com/jessamynsmith/paragres',
     download_url='https://github.com/jessamynsmith/paragres/archive/0.2.tar.gz',
-    description='Utility for synchronizing parallel PostgreSQL databases on Heroku and localhost',
+    description='Utility for synchronizing parallel PostgreSQL databases on Heroku, local, '
+                'and remote servers',
     keywords=['postgresql', 'postgres', 'psql', 'pgbackups', 'database', 'heroku'],
 
     classifiers=[
@@ -25,6 +28,7 @@ setup(
     ],
 
     install_requires=install_requires,
+    tests_require=tests_require,
 
     packages=find_packages(exclude=['*test*']),
 

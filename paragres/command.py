@@ -31,12 +31,22 @@ class Command(object):
 
     def __init__(self, args):
         self.args = args
-        self.db_settings = {}
-        self.db_name = self.args.dbname
+        self.databases = {
+            'source': {
+                'name': self.args.source_dbname,
+                'args': [],
+                'password': None,
+            },
+            'destination': {
+                'name': self.args.dbname,
+                'args': [],
+                'password': None,
+            }
+        }
 
-    def print_message(self, message):
+    def print_message(self, message, verbosity_needed=1):
         """ Prints the message, if verbosity is high enough. """
-        if self.args.verbosity > 0:
+        if self.args.verbosity >= verbosity_needed:
             print message
 
     def error(self, message, code=1):
@@ -44,9 +54,8 @@ class Command(object):
         print >>sys.stderr, message
         sys.exit(code)
 
-    def initialize_db_settings(self):
+    def parse_db_settings(self, settings):
         """ Parse out database settings from filename or DJANGO_SETTINGS_MODULE. """
-        settings = self.args.settings
         if settings == 'DJANGO_SETTINGS_MODULE':
             django_settings = os.environ.get('DJANGO_SETTINGS_MODULE')
             self.print_message("Getting settings file from DJANGO_SETTINGS_MODULE=%s"
@@ -62,31 +71,36 @@ class Command(object):
         parser.visit(settings_ast)
 
         try:
-            self.db_settings = parser.database_settings['default']
-            self.db_name = self.db_settings['NAME']
+            return parser.database_settings['default']
         except KeyError as e:
             self.error('Missing key or value for: %s\nSettings must be of the form: %s'
                        % (e.message, self.settings_format))
 
-    def set_postgres_env_vars(self):
-        """ Set environment variables for postgres commands. """
-        self.print_message("Setting PostgreSQL environment variables")
-        for key in ['USER', 'PASSWORD', 'HOST', 'PORT']:
-            value = self.db_settings.get(key)
-            if value:
-                env_var = 'PG%s' % key
-                self.print_message("Setting %s" % env_var)
-                os.environ[env_var] = value
+    def initialize_db_args(self, settings, db_key):
+        """ Initialize connection arguments for postgres commands. """
+        self.print_message("Initializing database settings for %s" % db_key, verbosity_needed=2)
 
-    def get_file_url_for_app(self, source_app):
-        """ Get latest backup URL from heroku pgbackups. """
-        self.print_message("Using pgbackups to get backup url for Heroku app '%s'" % source_app)
-        args = [
-            "heroku",
-            "pgbackups:url",
-            "--app=%s" % source_app,
-        ]
-        return subprocess.check_output(args).strip()
+        db_member = self.databases[db_key]
+
+        db_name = settings.get('NAME')
+        if db_name and not db_member['name']:
+            db_member['name'] = db_name
+
+        db_member['password'] = settings.get('PASSWORD')
+
+        args = []
+        for key in ['USER', 'HOST', 'PORT']:
+            value = settings.get(key)
+            if value:
+                self.print_message("Adding parameter %s" % key.lower, verbosity_needed=2)
+                args.append('--%s=%s' % (key.lower(), value))
+
+        db_member['args'] = args
+
+    def export_pgpassword(self, db_key):
+        if self.databases[db_key]['password']:
+            self.print_message("Exporting PGPASSWORD", verbosity_needed=2)
+            os.environ['PGPASSWORD'] = self.databases[db_key]['password']
 
     def create_file_name(self, backup_name):
         """ Create timestamped backup file name. """
@@ -101,6 +115,7 @@ class Command(object):
             output = open(filename, 'wb')
             output.write(db_file.read())
             output.close()
+            db_file.close()
         except Exception as e:
             self.error(str(e))
         self.print_message("File downloaded")
@@ -108,57 +123,117 @@ class Command(object):
     def unzip_file_if_necessary(self, source_file):
         """ Unzip file if zipped. """
         if source_file.endswith(".gz"):
-            self.print_message("Decompressing %s" % source_file)
+            self.print_message("Decompressing '%s'" % source_file)
             subprocess.check_call(["gunzip", "--force", source_file])
             source_file = source_file[:-len(".gz")]
         return source_file
 
-    def download_from_url(self, source_app, url):
+    def download_file_from_url(self, source_app, url):
         """ Download file from source app or url, and return local filename. """
         if source_app:
             source_name = source_app
         else:
-            source_name = urlparse.urlparse(url).netloc
+            source_name = urlparse.urlparse(url).netloc.replace('.', '_')
 
         filename = self.create_file_name(source_name)
         self.download_file(url, filename)
         return filename
 
-    def dump_database(self, db_name):
-        """ Create dumpfile from local database, and return filename. """
-        db_file = self.create_file_name('localhost')
-        self.print_message("Dumping local database '%s' to file '%s'" % (db_name, db_file))
+    def dump_database(self):
+        """ Create dumpfile from postgres database, and return filename. """
+        db_file = self.create_file_name(self.databases['source']['name'])
+        self.print_message("Dumping postgres database '%s' to file '%s'"
+                           % (self.databases['source']['name'], db_file))
+        self.export_pgpassword('source')
         args = [
             "pg_dump",
             "-Fc",
             "--no-acl",
             "--no-owner",
-            "--dbname=%s" % db_name,
+            "--dbname=%s" % self.databases['source']['name'],
             "--file=%s" % db_file,
         ]
+        args.extend(self.databases['source']['args'])
         subprocess.check_call(args)
         return db_file
 
     def drop_database(self):
-        """ Drop local database. """
-        self.print_message("Dropping database '%s'" % self.db_name)
+        """ Drop postgres database. """
+        self.print_message("Dropping database '%s'" % self.databases['destination']['name'])
+        self.export_pgpassword('destination')
         args = [
             "dropdb",
             "--if-exists",
-            self.db_name,
+            self.databases['destination']['name'],
         ]
+        args.extend(self.databases['destination']['args'])
         subprocess.check_call(args)
 
     def create_database(self):
-        """ Create local database. """
-        self.print_message("Creating database '%s'" % self.db_name)
+        """ Create postgres database. """
+        self.print_message("Creating database '%s'" % self.databases['destination']['name'])
+        self.export_pgpassword('destination')
         args = [
             "createdb",
-            self.db_name,
+            self.databases['destination']['name'],
         ]
-        user = self.db_settings.get('USER')
-        if user:
-            args.append("--owner=%s" % user)
+        args.extend(self.databases['destination']['args'])
+        for arg in self.databases['destination']['args']:
+            if arg[:7] == '--user=':
+                args.append('--owner=%s' % arg[7:])
+        subprocess.check_call(args)
+
+    def replace_postgres_db(self, file_url):
+        """ Replace postgres database with database from specified source. """
+        self.print_message("Replacing postgres database")
+
+        if file_url:
+            self.print_message("Sourcing data from online backup file '%s'" % file_url)
+            source_file = self.download_file_from_url(self.args.source_app, file_url)
+        elif self.databases['source']['name']:
+            self.print_message("Sourcing data from database '%s'"
+                               % self.databases['source']['name'])
+            source_file = self.dump_database()
+        else:
+            self.print_message("Sourcing data from local backup file %s" % self.args.file)
+            source_file = self.args.file
+
+        self.drop_database()
+        self.create_database()
+
+        source_file = self.unzip_file_if_necessary(source_file)
+
+        self.print_message("Importing '%s' into database '%s'"
+                           % (source_file, self.databases['destination']['name']))
+        args = [
+            "pg_restore",
+            "--no-acl",
+            "--no-owner",
+            "--dbname=%s" % self.databases['destination']['name'],
+            source_file,
+        ]
+        args.extend(self.databases['destination']['args'])
+        subprocess.check_call(args)
+
+    def get_file_url_for_heroku_app(self, source_app):
+        """ Get latest backup URL from heroku pgbackups. """
+        self.print_message("Using pgbackups to get backup url for Heroku app '%s'" % source_app)
+        args = [
+            "heroku",
+            "pgbackups:url",
+            "--app=%s" % source_app,
+        ]
+        return subprocess.check_output(args).strip()
+
+    def capture_heroku_database(self):
+        """ Capture Heroku database backup. """
+        self.print_message("Capturing database backup for app '%s'" % self.args.source_app)
+        args = [
+            "heroku",
+            "pgbackups:capture",
+            "--app=%s" % self.args.source_app,
+            "--expire",
+        ]
         subprocess.check_call(args)
 
     def reset_heroku_database(self):
@@ -172,24 +247,9 @@ class Command(object):
         ]
         subprocess.check_call(args)
 
-    def capture_heroku_database(self):
-        """ Capture Heroku database backup. """
-        self.print_message("Capturing database backup for app '%s'" % self.args.source_app)
-        args = [
-            "heroku",
-            "pgbackups:capture",
-            "--app=%s" % self.args.source_app,
-            # "--expire",
-        ]
-        subprocess.check_call(args)
-
-    def replace_heroku_db(self):
+    def replace_heroku_db(self, file_url):
         """ Replace Heroku database with database from specified source. """
         self.print_message("Replacing database for Heroku app '%s'" % self.args.destination_app)
-
-        file_url = self.args.url
-        if self.args.source_app:
-            file_url = self.get_file_url_for_app(self.args.source_app)
 
         self.reset_heroku_database()
 
@@ -206,65 +266,40 @@ class Command(object):
             ]
             subprocess.check_call(args)
         else:
-            self.print_message("Pushing data from local database '%s'" % self.args.local_db)
+            self.print_message("Pushing data from database '%s'" % self.databases['source']['name'])
             args = [
                 "heroku",
                 "pg:push",
-                self.args.local_db,
+                self.databases['source']['name'],
                 "DATABASE_URL",
                 "--app=%s" % self.args.destination_app,
             ]
             subprocess.check_call(args)
 
-    def replace_local_db(self):
-        """ Replace local database with database from specified source. """
-        self.print_message("Replacing localhost database")
+    def run(self):
+        """ Replace a database with the data from the specified source. """
+        self.print_message("\nBeginning database replacement process.\n")
+
+        if self.args.source_settings:
+            settings = self.parse_db_settings(self.args.source_settings)
+            self.initialize_db_args(settings, 'source')
+
+        if self.args.settings:
+            settings = self.parse_db_settings(self.args.settings)
+            self.initialize_db_args(settings, 'destination')
+
+        if self.args.capture:
+            self.capture_heroku_database()
 
         file_url = self.args.url
         if self.args.source_app:
             self.print_message("Sourcing data from backup for Heroku app '%s'"
                                % self.args.source_app)
-            file_url = self.get_file_url_for_app(self.args.source_app)
-
-        if file_url:
-            self.print_message("Sourcing data from online backup file '%s'" % file_url)
-            source_file = self.download_from_url(self.args.source_app, file_url)
-        elif self.args.local_db:
-            self.print_message("Sourcing data from local database '%s'" % self.args.local_db)
-            source_file = self.dump_database(self.db_name)
-        else:
-            source_file = self.args.file
-            self.print_message("Sourcing data from local backup file %s" % source_file)
-
-        self.drop_database()
-        self.create_database()
-
-        source_file = self.unzip_file_if_necessary(source_file)
-
-        self.print_message("Importing '%s' into database '%s'" % (source_file, self.db_name))
-        args = [
-            "pg_restore",
-            "--no-acl",
-            "--no-owner",
-            "--dbname=%s" % self.db_name,
-            source_file,
-        ]
-        subprocess.check_call(args)
-
-    def run(self):
-        """ Replace a database with the data from the specified source. """
-        self.print_message("\nBeginning database replacement process.\n")
-
-        if self.args.settings:
-            self.initialize_db_settings()
-            self.set_postgres_env_vars()
-
-        if self.args.capture:
-            self.capture_heroku_database()
+            file_url = self.get_file_url_for_heroku_app(self.args.source_app)
 
         if self.args.destination_app:
-            self.replace_heroku_db()
-        elif self.args.dbname or self.args.settings:
-            self.replace_local_db()
+            self.replace_heroku_db(file_url)
+        elif self.databases['destination']['name']:
+            self.replace_postgres_db(file_url)
 
         self.print_message("\nDone.\n\nDon't forget to update the Django Site entry if necessary!")
