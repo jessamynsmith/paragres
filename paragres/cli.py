@@ -5,17 +5,18 @@ from paragres.command import Command
 
 def create_parser():
     parser = argparse.ArgumentParser(
-        description='Copy a PostgreSQL database from one location to another.\n'
+        description='Copy a PostgreSQL database from one location to another.\n\n'
                     'Any Heroku apps must have the Heroku Postgres and PG Backups add-ons.\n'
-                    'Specify a Heroku app destination with -d or omit to use postgres directly.\n'
-                    'A single source is required, one of (-u, -s, -b, -o) for a Heroku destination '
-                    'or one of (-f, -u, -s, -b, -o) for a postgres destination.\n'
+                    'Specify a Heroku app destination with -d or omit to use postgres directly.\n\n'
+                    'A single source is required, one of (-u, -s, -b, -o) for a Heroku destination'
+                    '\nor one of (-f, -u, -s, -b, -o) for a postgres destination.\n'
                     'You may specify that a new Heroku backup be captured (-c), otherwise the '
-                    'most recent backup will be used.\n'
+                    'most recent backup will be used.\n\n'
                     'A postgres source requires either a settings file (-o) or a database '
-                    'name (-b). A postgres destination also requires either a settings file (-t) '
-                    'or a database name (-n). If authentication parameters are not supplied in a '
-                    'settings file, standard PostgreSQL authentication will apply.')
+                    'name (-b).\nA postgres destination also requires either a settings file (-t) '
+                    'or a database name (-n).\nIf authentication parameters are not supplied in a '
+                    'settings file, standard PostgreSQL authentication will apply.',
+        formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('-f', '--file', type=str,
                         help='PostgreSQL dump file to use as a data source')
     parser.add_argument('-u', '--url', type=str, help='Public URL from which to pull db file')
@@ -24,8 +25,8 @@ def create_parser():
                         help='Capture a new Heroku backup')
     parser.add_argument('-o', '--source-settings', type=str,
                         help="Django-style settings file with database connection information for "
-                             "source database, or 'DJANGO_SETTINGS_MODULE' to use that environment "
-                             "variable's value")
+                             "source database\n(or 'DJANGO_SETTINGS_MODULE' to use that environment "
+                             "variable's value)")
     parser.add_argument('-b', '--source-dbname', type=str,
                         help='Source database name (overrides value in source settings if both are '
                              'specified)')
@@ -33,8 +34,8 @@ def create_parser():
                         help='Heroku app for which to replace db')
     parser.add_argument('-t', '--settings', type=str,
                         help="Django-style settings file with database connection information for "
-                             "destination database, or 'DJANGO_SETTINGS_MODULE' to use that "
-                             "environment variable's value")
+                             "destination database\n(or 'DJANGO_SETTINGS_MODULE' to use that "
+                             "environment variable's value)")
     parser.add_argument('-n', '--dbname', type=str,
                         help='Destination database name (overrides value in settings if both are '
                              'specified)')
