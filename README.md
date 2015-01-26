@@ -84,6 +84,10 @@ Run tests and view coverage:
     coverage run -m nose
     coverage report
 
+Check code style:
+
+    flake8 --max-line-length=100    
+
 Install your local copy:
 
     python setup.py.install

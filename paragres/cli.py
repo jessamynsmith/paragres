@@ -25,8 +25,8 @@ def create_parser():
                         help='Capture a new Heroku backup')
     parser.add_argument('-o', '--source-settings', type=str,
                         help="Django-style settings file with database connection information for "
-                             "source database\n(or 'DJANGO_SETTINGS_MODULE' to use that environment "
-                             "variable's value)")
+                             "source database\n(or 'DJANGO_SETTINGS_MODULE' to use that "
+                             "environment variable's value)")
     parser.add_argument('-b', '--source-dbname', type=str,
                         help='Source database name (overrides value in source settings if both are '
                              'specified)')
