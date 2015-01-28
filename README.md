@@ -86,7 +86,7 @@ Run tests and view coverage:
 
 Check code style:
 
-    flake8 --max-line-length=100    
+    flake8
 
 Install your local copy:
 
