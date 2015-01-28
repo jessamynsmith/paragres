@@ -66,7 +66,7 @@ Supported transfers:
 |  | url | X | X |
 |  | Heroku app | X | X |
 
-* Can only push from a database accessible to the local user,
+ * Can only push from a database accessible to the local user,
 or accessible to a user configured via PG* environment variables
 
 
