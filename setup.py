@@ -8,11 +8,11 @@ with open(p.join(p.dirname(__file__), 'requirements_dev.txt'), 'r') as reqs:
 
 setup(
     name='paragres',
-    version='0.2',
+    version='0.3',
     author='Jessamyn Smith',
     author_email='jessamyn.smith@gmail.com',
     url='https://github.com/jessamynsmith/paragres',
-    download_url='https://github.com/jessamynsmith/paragres/archive/0.2.tar.gz',
+    download_url='https://github.com/jessamynsmith/paragres/archive/0.3.tar.gz',
     description='Utility for synchronizing parallel PostgreSQL databases on Heroku, local, '
                 'and remote servers',
     keywords=['postgresql', 'postgres', 'psql', 'pgbackups', 'database', 'heroku'],
