@@ -3,16 +3,22 @@ import os.path as p
 
 with open(p.join(p.dirname(__file__), 'requirements.txt'), 'r') as reqs:
     install_requires = [line.strip() for line in reqs]
-with open(p.join(p.dirname(__file__), 'requirements_dev.txt'), 'r') as reqs:
-    tests_require = [line.strip() for line in reqs]
+
+tests_require = []
+try:
+    with open(p.join(p.dirname(__file__), 'requirements_test.txt'), 'r') as reqs:
+        tests_require = [line.strip() for line in reqs]
+except IOError:
+    pass
+
 
 setup(
     name='paragres',
-    version='0.3',
+    version='0.4',
     author='Jessamyn Smith',
     author_email='jessamyn.smith@gmail.com',
     url='https://github.com/jessamynsmith/paragres',
-    download_url='https://github.com/jessamynsmith/paragres/archive/0.3.tar.gz',
+    download_url='https://github.com/jessamynsmith/paragres/archive/0.4.tar.gz',
     description='Utility for synchronizing parallel PostgreSQL databases on Heroku, local, '
                 'and remote servers',
     keywords=['postgresql', 'postgres', 'psql', 'pgbackups', 'database', 'heroku'],
