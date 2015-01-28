@@ -266,7 +266,11 @@ class Command(object):
             ]
             subprocess.check_call(args)
         else:
+            # TODO perhaps add support for file -> heroku by piping to pg:psql
             self.print_message("Pushing data from database '%s'" % self.databases['source']['name'])
+            self.print_message("NOTE: Any postgres authentication settings you passed to paragres"
+                               "will be ignored.\nIf desired, you can export PG* variables.\n"
+                               "You will be prompted for your psql password.")
             args = [
                 "heroku",
                 "pg:push",

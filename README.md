@@ -62,9 +62,12 @@ Supported transfers:
 | --- | --- | --- | --- |
 |  |  | postgres | Heroku app |
 | **Source** | local file | X |  |
-|  | postgres | X | X |
+|  | postgres | X | X * |
 |  | url | X | X |
 |  | Heroku app | X | X |
+
+* Can only push from a database accessible to the local user,
+or accessible to a user configured via PG* environment variables
 
 
 Development
