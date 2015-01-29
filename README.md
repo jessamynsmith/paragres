@@ -12,6 +12,8 @@ Easily copy databases between locations, e.g.:
 * Update one Heroku app (e.g. staging) with the data from another app (e.g. production)
 
 
+[![Build Status](https://travis-ci.org/jessamynsmith/paragres.svg?branch=master)](https://travis-ci.org/jessamynsmith/paragres)
+
 Installation
 ------------
 
