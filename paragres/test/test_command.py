@@ -6,6 +6,14 @@ import unittest
 from paragres.cli import create_parser
 from paragres.command import Command
 
+try:
+    # Python 3
+    from urllib import parse  # NOQA
+    urllib_patch_string = 'urllib.request.urlopen'
+except ImportError:
+    # Python 2
+    urllib_patch_string = 'urllib2.urlopen'
+
 
 class StringStartsWith(str):
     def __eq__(self, other):
@@ -44,7 +52,7 @@ class TestDbSettings(unittest.TestCase):
     def test_parse_db_settings_invalid(self, mock_error):
         self.command.parse_db_settings(os.path.join(self.data_dir, 'invalid_settings.py'))
 
-        mock_error.assert_called_once_with(StringStartsWith('Missing key or value for: default'))
+        mock_error.assert_called_once_with(StringStartsWith("Missing key or value for: 'default'"))
 
     def test_initialize_db_args(self):
         self.command.initialize_db_args(self.settings, 'source')
@@ -103,7 +111,7 @@ class TestFileCalls(unittest.TestCase):
         mock_strftime.assert_called_once_with('%Y-%m-%d-%H%M')
 
     @patch('paragres.command.Command.error')
-    @patch('urllib2.urlopen')
+    @patch(urllib_patch_string)
     def test_download_file_error(self, mock_urlopen, mock_error):
         mock_urlopen.side_effect = Exception('An error occurred!')
 
@@ -112,16 +120,16 @@ class TestFileCalls(unittest.TestCase):
         mock_urlopen.assert_called_once_with('http://example.com/')
         mock_error.assert_called_once_with('An error occurred!')
 
-    @patch('urllib2.urlopen')
+    @patch(urllib_patch_string)
     def test_download_file_success(self, mock_urlopen):
         src_filename = os.path.join(self.data_dir, 'src.sql')
-        mock_urlopen.return_value = open(src_filename)
+        mock_urlopen.return_value = open(src_filename, 'rb')
         destination_file = tempfile.NamedTemporaryFile()
 
         self.command.download_file('http://example.com/', destination_file.name)
 
         mock_urlopen.assert_called_once_with('http://example.com/')
-        self.assertEqual('PGDMP\n', destination_file.read())
+        self.assertEqual(b'PGDMP\n', destination_file.read())
 
     def test_unzip_file_if_necessary_not_zipped(self):
         compressed_filename = 'db.sql'
@@ -139,10 +147,10 @@ class TestFileCalls(unittest.TestCase):
         self.assertEqual('db.sql', result)
         mock_check_call.assert_called_once_with(['gunzip', '--force', compressed_filename])
 
-    @patch('urllib2.urlopen')
+    @patch(urllib_patch_string)
     def test_download_file_from_url_no_source_app(self, mock_urlopen):
         src_filename = os.path.join(self.data_dir, 'src.sql')
-        mock_urlopen.return_value = open(src_filename)
+        mock_urlopen.return_value = open(src_filename, 'rb')
 
         result = self.command.download_file_from_url(None, 'http://www.example.com')
 
@@ -152,10 +160,10 @@ class TestFileCalls(unittest.TestCase):
         self.assertEqual('www_example_com-backup-', result[:23])
         mock_urlopen.assert_called_once_with('http://www.example.com')
 
-    @patch('urllib2.urlopen')
+    @patch(urllib_patch_string)
     def test_download_file_from_url_with_source_app(self, mock_urlopen):
         src_filename = os.path.join(self.data_dir, 'src.sql')
-        mock_urlopen.return_value = open(src_filename)
+        mock_urlopen.return_value = open(src_filename, 'rb')
 
         result = self.command.download_file_from_url('app1', 'http://www.example.com')
 
@@ -235,7 +243,7 @@ class TestDbCalls(unittest.TestCase):
         expected_args = ['createdb', 'destdb', '--user=username', '--owner=username']
         mock_check_call.assert_called_once_with(expected_args)
 
-    @patch('urllib2.urlopen')
+    @patch(urllib_patch_string)
     @patch('subprocess.check_call')
     def test_replace_postgres_db_url_file_source(self, mock_check_call, mock_urlopen):
         mock_urlopen.return_value = tempfile.NamedTemporaryFile()
@@ -249,7 +257,7 @@ class TestDbCalls(unittest.TestCase):
                                 StringStartsWith('www_example_com-backup-')])]
         self.assertEqual(expected_calls, mock_check_call.call_args_list)
 
-    @patch('urllib2.urlopen')
+    @patch(urllib_patch_string)
     @patch('subprocess.check_call')
     def test_replace_postgres_db_source(self, mock_check_call, mock_urlopen):
         mock_urlopen.return_value = tempfile.NamedTemporaryFile()
@@ -285,7 +293,7 @@ class TestHerokuCalls(unittest.TestCase):
 
     @patch('subprocess.check_output')
     def test_get_file_url_for_heroku_app(self, mock_check_output):
-        mock_check_output.return_value = '  http://example.com/  '
+        mock_check_output.return_value = b'  http://example.com/  '
         command = Command(self.parser.parse_args([]))
 
         url = command.get_file_url_for_heroku_app('app1')
@@ -352,7 +360,7 @@ class TestRun(unittest.TestCase):
     @patch('subprocess.check_output')
     @patch('subprocess.check_call')
     def test_run_destination_heroku(self, mock_check_call, mock_check_output):
-        mock_check_output.return_value = '  http://example.com/  '
+        mock_check_output.return_value = b'  http://example.com/  '
         command = Command(self.parser.parse_args(['-c', '-s', 'app1', '-d', 'app2']))
         command.databases['source']['name'] = 'srcdb'
 

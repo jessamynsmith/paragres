@@ -3,8 +3,13 @@ import os
 import sys
 import subprocess
 import time
-import urllib2
-import urlparse
+try:
+    # Python 3
+    from urllib import parse as urlparse, request as urllib2
+except ImportError:
+    # Python 2
+    import urllib2
+    import urlparse
 
 
 class DatabaseSettingsParser(ast.NodeVisitor):
@@ -47,11 +52,11 @@ class Command(object):
     def print_message(self, message, verbosity_needed=1):
         """ Prints the message, if verbosity is high enough. """
         if self.args.verbosity >= verbosity_needed:
-            print message
+            print(message)
 
     def error(self, message, code=1):
         """ Prints the error, and exits with the given code. """
-        print >>sys.stderr, message
+        sys.stderr.write(message)
         sys.exit(code)
 
     def parse_db_settings(self, settings):
@@ -65,16 +70,16 @@ class Command(object):
             settings = os.path.join(*path_pieces)
 
         self.print_message("Parsing settings from settings file '%s'" % settings)
-        settings_file = open(settings)
-        settings_ast = ast.parse(settings_file.read())
         parser = DatabaseSettingsParser()
-        parser.visit(settings_ast)
+        with open(settings) as settings_file:
+            settings_ast = ast.parse(settings_file.read())
+            parser.visit(settings_ast)
 
         try:
             return parser.database_settings['default']
         except KeyError as e:
-            self.error('Missing key or value for: %s\nSettings must be of the form: %s'
-                       % (e.message, self.settings_format))
+            self.error("Missing key or value for: %s\nSettings must be of the form: %s"
+                       % (e, self.settings_format))
 
     def initialize_db_args(self, settings, db_key):
         """ Initialize connection arguments for postgres commands. """
@@ -112,9 +117,8 @@ class Command(object):
         self.print_message("Downloading to file '%s' from URL '%s'" % (filename, url))
         try:
             db_file = urllib2.urlopen(url)
-            output = open(filename, 'wb')
-            output.write(db_file.read())
-            output.close()
+            with open(filename, 'wb') as output:
+                output.write(db_file.read())
             db_file.close()
         except Exception as e:
             self.error(str(e))
@@ -223,7 +227,7 @@ class Command(object):
             "pgbackups:url",
             "--app=%s" % source_app,
         ]
-        return subprocess.check_output(args).strip()
+        return subprocess.check_output(args).strip().decode('ascii')
 
     def capture_heroku_database(self):
         """ Capture Heroku database backup. """
@@ -268,7 +272,7 @@ class Command(object):
         else:
             # TODO perhaps add support for file -> heroku by piping to pg:psql
             self.print_message("Pushing data from database '%s'" % self.databases['source']['name'])
-            self.print_message("NOTE: Any postgres authentication settings you passed to paragres"
+            self.print_message("NOTE: Any postgres authentication settings you passed to paragres "
                                "will be ignored.\nIf desired, you can export PG* variables.\n"
                                "You will be prompted for your psql password.")
             args = [

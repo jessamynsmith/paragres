@@ -29,6 +29,7 @@ setup(
         "Intended Audience :: Developers",
         'Programming Language :: Python',
         'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3.4',
         'License :: OSI Approved :: MIT License',
         "Topic :: Software Development",
         "Topic :: Utilities",
