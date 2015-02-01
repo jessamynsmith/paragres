@@ -13,6 +13,7 @@ Easily copy databases between locations, e.g.:
 
 
 [![Build Status](https://travis-ci.org/jessamynsmith/paragres.svg?branch=master)](https://travis-ci.org/jessamynsmith/paragres)
+[![Coverage Status](https://coveralls.io/repos/jessamynsmith/paragres/badge.svg?branch=master)](https://coveralls.io/r/jessamynsmith/paragres?branch=master)
 
 Installation
 ------------
