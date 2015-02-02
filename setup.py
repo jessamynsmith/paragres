@@ -22,6 +22,7 @@ setup(
     license='MIT',
     description='Utility for synchronizing parallel PostgreSQL databases on Heroku, local, '
                 'and remote servers',
+    long_description=open('README.rst').read(),
     keywords=['postgresql', 'postgres', 'psql', 'pgbackups', 'database', 'heroku'],
 
     classifiers=[
