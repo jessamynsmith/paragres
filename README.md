@@ -3,9 +3,9 @@ paragres
 
 [![Build Status](https://travis-ci.org/jessamynsmith/paragres.svg?branch=master)](https://travis-ci.org/jessamynsmith/paragres)
 [![Coverage Status](https://coveralls.io/repos/jessamynsmith/paragres/badge.svg?branch=master)](https://coveralls.io/r/jessamynsmith/paragres?branch=master)
-[![Coverage Status](https://pypip.in/version/paragres/badge.svg)](https://pypi.python.org/pypi/paragres)
-[![Coverage Status](https://pypip.in/py_versions/paragres/badge.svg)](https://pypi.python.org/pypi/paragres)
-[![Coverage Status](https://pypip.in/download/paragres/badge.svg)](https://pypi.python.org/pypi/paragres)
+[![PyPI Version](https://pypip.in/version/paragres/badge.svg)](https://pypi.python.org/pypi/paragres)
+[![Supported Versions](https://pypip.in/py_versions/paragres/badge.svg)](https://pypi.python.org/pypi/paragres)
+[![Downloads](https://pypip.in/download/paragres/badge.svg)](https://pypi.python.org/pypi/paragres)
 
 Utility for synchronizing parallel PostgreSQL databases on Heroku, local, and remote servers
 
