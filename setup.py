@@ -19,6 +19,7 @@ setup(
     author_email='jessamyn.smith@gmail.com',
     url='https://github.com/jessamynsmith/paragres',
     download_url='https://github.com/jessamynsmith/paragres/archive/0.5.tar.gz',
+    license='MIT',
     description='Utility for synchronizing parallel PostgreSQL databases on Heroku, local, '
                 'and remote servers',
     keywords=['postgresql', 'postgres', 'psql', 'pgbackups', 'database', 'heroku'],
@@ -29,6 +30,8 @@ setup(
         "Intended Audience :: Developers",
         'Programming Language :: Python',
         'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3.2',
+        'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
         'License :: OSI Approved :: MIT License',
         "Topic :: Software Development",
