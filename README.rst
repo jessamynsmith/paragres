@@ -10,10 +10,11 @@ local, and remote servers
 Features
 --------
 
-Easily copy databases between locations, e.g.: \* Initialize a Heroku
-database with local data \* Update local development database with the
-latest data in your Heroku app \* Update one Heroku app (e.g. staging)
-with the data from another app (e.g. production)
+Easily copy databases between locations, e.g.:
+
+- Initialize a Heroku database with local data
+- Update local development database with the latest data in your Heroku app
+- Update one Heroku app (e.g. staging) with the data from another app (e.g. production)
 
 Installation
 ------------
