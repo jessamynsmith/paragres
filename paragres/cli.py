@@ -1,4 +1,5 @@
 import argparse
+import pkg_resources
 
 from paragres.command import Command
 
@@ -17,6 +18,9 @@ def create_parser():
                     'or a database name (-n).\nIf authentication parameters are not supplied in a '
                     'settings file, standard PostgreSQL authentication will apply.',
         formatter_class=argparse.RawTextHelpFormatter)
+
+    parser.add_argument('--version', action='store_true', default=False,
+                        help="Show program's version number")
     parser.add_argument('-f', '--file', type=str,
                         help='PostgreSQL dump file to use as a data source')
     parser.add_argument('-u', '--url', type=str, help='Public URL from which to pull db file')
@@ -79,8 +83,13 @@ def error(parser, message):
 def main():
     parser = create_parser()
     parsed_args = parser.parse_args()
+
+    if parsed_args.version:
+        parser.exit("paragres %s" % pkg_resources.require("paragres")[0].version)
+
     error_message = verify_args(parsed_args)
     if error_message:
         error(parser, error_message)
     command = Command(parsed_args)
     command.run()
+    return 0

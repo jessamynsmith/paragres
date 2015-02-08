@@ -1,7 +1,14 @@
-from mock import patch
+from mock import call, patch
+import sys
 import unittest
 
 from paragres import cli
+
+
+# Extract these to package, maybe even submit pr to mock
+class StringStartsWith(str):
+    def __eq__(self, other):
+        return other.find(self) == 0
 
 
 class TestCli(unittest.TestCase):
@@ -77,3 +84,29 @@ class TestCli(unittest.TestCase):
             self.fail("Should fail without arguments")
         except SystemExit:
             pass
+
+    def test_main_invalid_args(self):
+        sys.argv = ['paragres', '-c']
+
+        try:
+            cli.main()
+            self.fail("Should fail with invalid argument")
+        except SystemExit as e:
+            self.assertEqual('0', str(e))
+
+    @patch('subprocess.check_call')
+    def test_main_success(self, mock_check_call):
+        sys.argv = ['paragres', '-b', 'sourcedb', '-n', 'destdb']
+
+        result = cli.main()
+
+        self.assertEqual(0, result)
+        expected = [
+            call(['pg_dump', '-Fc', '--no-acl', '--no-owner', '--dbname=sourcedb',
+                  StringStartsWith('--file=sourcedb-backup-')]),
+            call(['dropdb', '--if-exists', 'destdb']),
+            call(['createdb', 'destdb']),
+            call(['pg_restore', '--no-acl', '--no-owner', '--dbname=destdb',
+                  StringStartsWith('sourcedb-backup-')])
+        ]
+        self.assertEqual(expected, mock_check_call.call_args_list)
