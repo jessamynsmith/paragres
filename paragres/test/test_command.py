@@ -299,7 +299,7 @@ class TestHerokuCalls(unittest.TestCase):
         url = command.get_file_url_for_heroku_app('app1')
 
         self.assertEqual('http://example.com/', url)
-        expected_args = ['heroku', 'pgbackups:url', '--app=app1']
+        expected_args = ['heroku', 'pg:backups', 'public-url', '--app=app1']
         mock_check_output.assert_called_once_with(expected_args)
 
     @patch('subprocess.check_call')
@@ -308,7 +308,7 @@ class TestHerokuCalls(unittest.TestCase):
 
         command.capture_heroku_database()
 
-        expected_args = ['heroku', 'pgbackups:capture', '--app=app1', '--expire']
+        expected_args = ['heroku', 'pg:backups', 'capture', '--app=app1']
         mock_check_call.assert_called_once_with(expected_args)
 
     @patch('subprocess.check_call')
@@ -328,8 +328,8 @@ class TestHerokuCalls(unittest.TestCase):
         command.replace_heroku_db('www.example.com')
 
         expected_calls = [call(['heroku', 'pg:reset', '--app=app2', 'DATABASE_URL']),
-                          call(['heroku', 'pgbackups:restore', '--app=app2', 'DATABASE_URL',
-                               '--confirm', 'app2', 'www.example.com'])]
+                          call(['heroku', 'pg:backups', 'restore', 'www.example.com', '--app=app2',
+                                'DATABASE'])]
         self.assertEqual(expected_calls, mock_check_call.call_args_list)
 
     @patch('subprocess.check_call')
@@ -366,12 +366,13 @@ class TestRun(unittest.TestCase):
 
         command.run()
 
-        expected_calls = [call(['heroku', 'pgbackups:capture', '--app=app1', '--expire']),
+        expected_calls = [call(['heroku', 'pg:backups', 'capture', '--app=app1']),
                           call(['heroku', 'pg:reset', '--app=app2', 'DATABASE_URL']),
-                          call(['heroku', 'pgbackups:restore', '--app=app2', 'DATABASE_URL',
-                                '--confirm', 'app2', 'http://example.com/'])]
+                          call(['heroku', 'pg:backups', 'restore', 'http://example.com/',
+                                '--app=app2', 'DATABASE'])]
         self.assertEqual(expected_calls, mock_check_call.call_args_list)
-        mock_check_output.assert_called_once_with(['heroku', 'pgbackups:url', '--app=app1'])
+        mock_check_output.assert_called_once_with(['heroku', 'pg:backups', 'public-url',
+                                                   '--app=app1'])
 
     @patch('subprocess.check_call')
     def test_run_destination_postgres(self, mock_check_call):

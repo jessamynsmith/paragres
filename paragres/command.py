@@ -220,11 +220,13 @@ class Command(object):
         subprocess.check_call(args)
 
     def get_file_url_for_heroku_app(self, source_app):
-        """ Get latest backup URL from heroku pgbackups. """
-        self.print_message("Using pgbackups to get backup url for Heroku app '%s'" % source_app)
+        """ Get latest backup URL from heroku pg:backups. """
+        self.print_message("Using pg:backups to get backup url for Heroku app '%s'" % source_app)
+
         args = [
             "heroku",
-            "pgbackups:url",
+            "pg:backups",
+            "public-url",
             "--app=%s" % source_app,
         ]
         return subprocess.check_output(args).strip().decode('ascii')
@@ -234,9 +236,9 @@ class Command(object):
         self.print_message("Capturing database backup for app '%s'" % self.args.source_app)
         args = [
             "heroku",
-            "pgbackups:capture",
+            "pg:backups",
+            "capture",
             "--app=%s" % self.args.source_app,
-            "--expire",
         ]
         subprocess.check_call(args)
 
@@ -261,12 +263,11 @@ class Command(object):
             self.print_message("Restoring from URL '%s'" % file_url)
             args = [
                 "heroku",
-                "pgbackups:restore",
-                "--app=%s" % self.args.destination_app,
-                "DATABASE_URL",
-                "--confirm",
-                self.args.destination_app,
+                "pg:backups",
+                "restore",
                 file_url,
+                "--app=%s" % self.args.destination_app,
+                "DATABASE",
             ]
             subprocess.check_call(args)
         else:

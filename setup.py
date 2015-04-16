@@ -14,11 +14,11 @@ except IOError:
 
 setup(
     name='paragres',
-    version='0.5',
+    version='0.6',
     author='Jessamyn Smith',
     author_email='jessamyn.smith@gmail.com',
     url='https://github.com/jessamynsmith/paragres',
-    download_url='https://github.com/jessamynsmith/paragres/archive/v0.5.tar.gz',
+    download_url='https://github.com/jessamynsmith/paragres/archive/v0.6.tar.gz',
     license='MIT',
     description='Utility for synchronizing parallel PostgreSQL databases on Heroku, local, '
                 'and remote servers',
