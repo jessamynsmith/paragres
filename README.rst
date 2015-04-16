@@ -41,6 +41,9 @@ working directory with:
 Use
 ---
 
+Note: To use paragres to access a Heroku app, you must be logged into the Heroku account that
+owns that app.
+
 Example 1, copying data between Heroku databases:
 
 ::
