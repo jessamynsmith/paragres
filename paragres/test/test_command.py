@@ -349,7 +349,7 @@ class TestHerokuCalls(unittest.TestCase):
 
         expected_calls = [call(['heroku', 'pg:reset', '--app=app2', 'DATABASE_URL']),
                           call(['heroku', 'pg:backups', 'restore', 'www.example.com', '--app=app2',
-                                'DATABASE'])]
+                                'DATABASE', '--confirm', 'app2'])]
         self.assertEqual(expected_calls, mock_check_call.call_args_list)
 
     @patch('subprocess.check_call')
@@ -402,7 +402,7 @@ class TestRun(unittest.TestCase):
         expected_calls = [call(['heroku', 'pg:backups', 'capture', '--app=app1']),
                           call(['heroku', 'pg:reset', '--app=app2', 'DATABASE_URL']),
                           call(['heroku', 'pg:backups', 'restore', 'http://example.com/',
-                                '--app=app2', 'DATABASE'])]
+                                '--app=app2', 'DATABASE', '--confirm', 'app2'])]
         self.assertEqual(expected_calls, mock_check_call.call_args_list)
         mock_check_output.assert_called_once_with(['heroku', 'pg:backups', 'public-url',
                                                    '--app=app1'])

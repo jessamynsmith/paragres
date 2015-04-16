@@ -280,6 +280,8 @@ class Command(object):
                 file_url,
                 "--app=%s" % self.args.destination_app,
                 "DATABASE",
+                "--confirm",
+                self.args.destination_app,
             ]
             if self.args.use_pgbackups:
                 args = [
