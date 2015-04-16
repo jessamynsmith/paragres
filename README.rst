@@ -41,8 +41,11 @@ working directory with:
 Use
 ---
 
-Note: To use paragres to access a Heroku app, you must be logged into the Heroku account that
+Note 1: To use paragres to access a Heroku app, you must be logged into the Heroku account that
 owns that app.
+
+Note 2: By default, Heroku's new pg:backups command is used. if you want to use the old pgbackups
+addon, you must specify --use-pgbackups
 
 Example 1, copying data between Heroku databases:
 

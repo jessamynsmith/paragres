@@ -302,6 +302,17 @@ class TestHerokuCalls(unittest.TestCase):
         expected_args = ['heroku', 'pg:backups', 'public-url', '--app=app1']
         mock_check_output.assert_called_once_with(expected_args)
 
+    @patch('subprocess.check_output')
+    def test_get_file_url_for_heroku_app_use_pgbackups(self, mock_check_output):
+        mock_check_output.return_value = b'  http://example.com/  '
+        command = Command(self.parser.parse_args(['--use-pgbackups']))
+
+        url = command.get_file_url_for_heroku_app('app1')
+
+        self.assertEqual('http://example.com/', url)
+        expected_args = ['heroku', 'pgbackups:url', '--app=app1']
+        mock_check_output.assert_called_once_with(expected_args)
+
     @patch('subprocess.check_call')
     def test_capture_heroku_database(self, mock_check_call):
         command = Command(self.parser.parse_args(['-s', 'app1']))
@@ -309,6 +320,15 @@ class TestHerokuCalls(unittest.TestCase):
         command.capture_heroku_database()
 
         expected_args = ['heroku', 'pg:backups', 'capture', '--app=app1']
+        mock_check_call.assert_called_once_with(expected_args)
+
+    @patch('subprocess.check_call')
+    def test_capture_heroku_database_pgbackups(self, mock_check_call):
+        command = Command(self.parser.parse_args(['-s', 'app1', '--use-pgbackups']))
+
+        command.capture_heroku_database()
+
+        expected_args = ['heroku', 'pgbackups:capture', '--app=app1', '--expire']
         mock_check_call.assert_called_once_with(expected_args)
 
     @patch('subprocess.check_call')
@@ -330,6 +350,19 @@ class TestHerokuCalls(unittest.TestCase):
         expected_calls = [call(['heroku', 'pg:reset', '--app=app2', 'DATABASE_URL']),
                           call(['heroku', 'pg:backups', 'restore', 'www.example.com', '--app=app2',
                                 'DATABASE'])]
+        self.assertEqual(expected_calls, mock_check_call.call_args_list)
+
+    @patch('subprocess.check_call')
+    def test_replace_heroku_db_with_file_url_pgbackups(self, mock_check_call):
+        command = Command(self.parser.parse_args(['-u', 'www.example.com', '-d', 'app2',
+                                                  '--use-pgbackups']))
+        command.databases['source']['name'] = 'srcdb'
+
+        command.replace_heroku_db('www.example.com')
+
+        expected_calls = [call(['heroku', 'pg:reset', '--app=app2', 'DATABASE_URL']),
+                          call(['heroku', 'pgbackups:restore', '--app=app2', 'DATABASE_URL',
+                               '--confirm', 'app2', 'www.example.com'])]
         self.assertEqual(expected_calls, mock_check_call.call_args_list)
 
     @patch('subprocess.check_call')

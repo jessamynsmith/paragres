@@ -45,6 +45,9 @@ def create_parser():
                              'specified)')
     parser.add_argument('-v', '--verbosity', type=int, default=1,
                         help='Verbosity level: 0=minimal output, 1=normal output')
+    # The pgbackups addon is deprecated, but continue supporting it until it is removed
+    parser.add_argument('--use-pgbackups', action='store_true', default=False,
+                        help="Use the deprecated pgbackups addon rather than Heroku pg:backups")
     return parser
 
 

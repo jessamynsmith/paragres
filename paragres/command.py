@@ -220,15 +220,20 @@ class Command(object):
         subprocess.check_call(args)
 
     def get_file_url_for_heroku_app(self, source_app):
-        """ Get latest backup URL from heroku pg:backups. """
-        self.print_message("Using pg:backups to get backup url for Heroku app '%s'" % source_app)
-
+        """ Get latest backup URL from heroku pg:backups (or pgbackups). """
+        self.print_message("Getting backup url for Heroku app '%s'" % source_app)
         args = [
             "heroku",
             "pg:backups",
             "public-url",
             "--app=%s" % source_app,
         ]
+        if self.args.use_pgbackups:
+            args = [
+                "heroku",
+                "pgbackups:url",
+                "--app=%s" % source_app,
+            ]
         return subprocess.check_output(args).strip().decode('ascii')
 
     def capture_heroku_database(self):
@@ -240,6 +245,13 @@ class Command(object):
             "capture",
             "--app=%s" % self.args.source_app,
         ]
+        if self.args.use_pgbackups:
+            args = [
+                "heroku",
+                "pgbackups:capture",
+                "--app=%s" % self.args.source_app,
+                "--expire",
+            ]
         subprocess.check_call(args)
 
     def reset_heroku_database(self):
@@ -269,6 +281,16 @@ class Command(object):
                 "--app=%s" % self.args.destination_app,
                 "DATABASE",
             ]
+            if self.args.use_pgbackups:
+                args = [
+                    "heroku",
+                    "pgbackups:restore",
+                    "--app=%s" % self.args.destination_app,
+                    "DATABASE_URL",
+                    "--confirm",
+                    self.args.destination_app,
+                    file_url,
+                ]
             subprocess.check_call(args)
         else:
             # TODO perhaps add support for file -> heroku by piping to pg:psql
