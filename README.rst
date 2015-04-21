@@ -136,8 +136,8 @@ Install your local copy:
 
     python setup.py.install
 
-.. |Build Status| image:: https://travis-ci.org/jessamynsmith/paragres.svg?branch=master
-   :target: https://travis-ci.org/jessamynsmith/paragres
+.. |Build Status| image:: https://circleci.com/gh/jessamynsmith/paragres.svg?style=shield
+   :target: https://circleci.com/gh/jessamynsmith/paragres
 .. |Coverage Status| image:: https://coveralls.io/repos/jessamynsmith/paragres/badge.svg?branch=master
    :target: https://coveralls.io/r/jessamynsmith/paragres?branch=master
 .. |PyPI Version| image:: https://pypip.in/version/paragres/badge.svg
