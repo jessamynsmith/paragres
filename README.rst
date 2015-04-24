@@ -38,8 +38,8 @@ working directory with:
 
     python setup.py.install
 
-Use
----
+Usage
+-----
 
 Note 1: To use paragres to access a Heroku app, you must be logged into the Heroku account that
 owns that app.
@@ -117,18 +117,20 @@ Create a virtualenv and install dependencies:
     mkvirtualenv paragres
     pip install -r requirements/package.txt -r requirements/test.txt
 
-Run tests and view coverage:
+Run tests with coverage (should be 100%) and check code style:
 
 ::
 
     coverage run -m nose
-    coverage report
+    coverage report -m
+    flake8
 
-Check code style:
+Verify all supported Python versions:
 
 ::
 
-    flake8
+    pip install tox
+    tox
 
 Install your local copy:
 

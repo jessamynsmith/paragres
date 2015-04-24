@@ -1,6 +1,8 @@
 from setuptools import setup, find_packages
 import os.path as p
 
+version = '0.6.1'
+
 with open(p.join(p.dirname(__file__), 'requirements', 'package.txt'), 'r') as reqs:
     install_requires = [line.strip() for line in reqs]
 
@@ -14,11 +16,11 @@ except IOError:
 
 setup(
     name='paragres',
-    version='0.6',
+    version=version,
     author='Jessamyn Smith',
     author_email='jessamyn.smith@gmail.com',
     url='https://github.com/jessamynsmith/paragres',
-    download_url='https://github.com/jessamynsmith/paragres/archive/v0.6.tar.gz',
+    download_url='https://github.com/jessamynsmith/paragres/archive/v{0}.tar.gz'.format(version),
     license='MIT',
     description='Utility for synchronizing parallel PostgreSQL databases on Heroku, local, '
                 'and remote servers',
