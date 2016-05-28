@@ -2,6 +2,10 @@ machine:
   post:
     - pyenv global 2.6.8 2.7.9 3.2.5 3.3.3 3.4.2
 
+dependencies:
+    override:
+        - pip install -U setuptools
+
 test:
   override:
     - tox
