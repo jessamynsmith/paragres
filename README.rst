@@ -1,7 +1,7 @@
 paragres
 ========
 
-|Build Status| |Coverage Status| |PyPI Version| |Supported Versions|
+|Build Status| |Coverage Status| |PyPI Version| |Supported Python Versions|
 |Downloads|
 
 Utility for synchronizing parallel PostgreSQL databases on Heroku,
@@ -138,13 +138,18 @@ Install your local copy:
 
     python setup.py.install
 
-.. |Build Status| image:: https://circleci.com/gh/jessamynsmith/paragres.svg?style=shield
+.. |Build Status| image:: https://img.shields.io/circleci/project/github/jessamynsmith/paragres.svg
    :target: https://circleci.com/gh/jessamynsmith/paragres
-.. |Coverage Status| image:: https://coveralls.io/repos/jessamynsmith/paragres/badge.svg?branch=master
+   :alt: Build status
+.. |Coverage Status| image:: https://img.shields.io/coveralls/jessamynsmith/paragres.svg
    :target: https://coveralls.io/r/jessamynsmith/paragres?branch=master
-.. |PyPI Version| image:: https://pypip.in/version/paragres/badge.svg
+   :alt: Coverage status
+.. |PyPI Version| image:: https://img.shields.io/pypi/v/paragres.svg
    :target: https://pypi.python.org/pypi/paragres
-.. |Supported Versions| image:: https://pypip.in/py_versions/paragres/badge.svg
+   :alt: Latest PyPI version
+.. |Supported Python Versions| image:: https://img.shields.io/pypi/pyversions/paragres.svg
    :target: https://pypi.python.org/pypi/paragres
-.. |Downloads| image:: https://pypip.in/download/paragres/badge.svg
+   :alt: Supported Python versions
+.. |Downloads| image:: https://img.shields.io/pypi/dm/paragres.svg
    :target: https://pypi.python.org/pypi/paragres
+   :alt: Number of PyPI downloads
