@@ -224,8 +224,7 @@ class Command(object):
         self.print_message("Getting backup url for Heroku app '%s'" % source_app)
         args = [
             "heroku",
-            "pg:backups",
-            "public-url",
+            "pg:backups:url",
             "--app=%s" % source_app,
         ]
         if self.args.use_pgbackups:
@@ -241,8 +240,7 @@ class Command(object):
         self.print_message("Capturing database backup for app '%s'" % self.args.source_app)
         args = [
             "heroku",
-            "pg:backups",
-            "capture",
+            "pg:backups:capture",
             "--app=%s" % self.args.source_app,
         ]
         if self.args.use_pgbackups:
@@ -275,8 +273,7 @@ class Command(object):
             self.print_message("Restoring from URL '%s'" % file_url)
             args = [
                 "heroku",
-                "pg:backups",
-                "restore",
+                "pg:backups:restore",
                 file_url,
                 "--app=%s" % self.args.destination_app,
                 "DATABASE",
