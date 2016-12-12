@@ -7,6 +7,8 @@ paragres
 Utility for synchronizing parallel PostgreSQL databases on Heroku,
 local, and remote servers
 
+Like my work? Tip me! https://www.paypal.me/jessamynsmith
+
 Features
 --------
 
@@ -136,7 +138,7 @@ Install your local copy:
 
 ::
 
-    python setup.py.install
+    python setup.py install
 
 .. |Build Status| image:: https://img.shields.io/circleci/project/github/jessamynsmith/paragres.svg
    :target: https://circleci.com/gh/jessamynsmith/paragres
