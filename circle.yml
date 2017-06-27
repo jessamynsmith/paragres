@@ -1,8 +1,8 @@
 machine:
   post:
-    - pip install virtualenv
     - pyenv global 2.7.9 3.3.3 3.4.2 3.5.0
 
 test:
   override:
+    - pip install virtualenv
     - tox
