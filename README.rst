@@ -103,6 +103,33 @@ Supported transfers:
 \* Can only push from a database accessible to the local user, or
 accessible to a user configured via PG\* environment variables
 
+Full list of optional arguments:
+
+.. code-block:: shell
+
+  -h, --help            show this help message and exit
+  --version             Show program's version number
+  -f FILE, --file FILE  PostgreSQL dump file to use as a data source
+  -u URL, --url URL     Public URL from which to pull db file
+  -s SOURCE_APP, --source-app SOURCE_APP
+                        Heroku app from which to pull db
+  -c, --capture         Capture a new Heroku backup
+  -o SOURCE_SETTINGS, --source-settings SOURCE_SETTINGS
+                        Django-style settings file with database connection information for source database
+                        (or 'DJANGO_SETTINGS_MODULE' to use that environment variable's value)
+  -b SOURCE_DBNAME, --source-dbname SOURCE_DBNAME
+                        Source database name (overrides value in source settings if both are specified)
+  -d DESTINATION_APP, --destination-app DESTINATION_APP
+                        Heroku app for which to replace db
+  -t SETTINGS, --settings SETTINGS
+                        Django-style settings file with database connection information for destination database
+                        (or 'DJANGO_SETTINGS_MODULE' to use that environment variable's value)
+  -n DBNAME, --dbname DBNAME
+                        Destination database name (overrides value in settings if both are specified)
+  -v VERBOSITY, --verbosity VERBOSITY
+                        Verbosity level: 0=minimal output, 1=normal output
+  --use-pgbackups       Use the deprecated pgbackups addon rather than Heroku pg:backups
+
 Development
 -----------
 
