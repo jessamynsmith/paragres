@@ -3,6 +3,7 @@ workflows:
   build-deploy:
     jobs:
       - build
+          context: paragres
 
 version: 2
 jobs:
