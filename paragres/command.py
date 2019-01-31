@@ -120,7 +120,7 @@ class Command(object):
             with open(filename, 'wb') as output:
                 while True:
                     chunk = db_file.read(1024 * 1024)
-                    if chunk == '':
+                    if not chunk:
                         break
                     output.write(chunk)
             db_file.close()
