@@ -118,7 +118,11 @@ class Command(object):
         try:
             db_file = urllib2.urlopen(url)
             with open(filename, 'wb') as output:
-                output.write(db_file.read())
+                while True:
+                    chunk = db_file.read(1024 * 1024)
+                    if chunk == '':
+                        break
+                    output.write(chunk)
             db_file.close()
         except Exception as e:
             self.error(str(e))
